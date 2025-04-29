@@ -25,6 +25,7 @@ func LoadConfig(path string) (*conf, error) {
 	viper.SetConfigType("env")
 	viper.AddConfigPath(path)
 	viper.SetConfigFile(".env")
+	viper.AutomaticEnv()
 	err := viper.ReadInConfig()
 	if err != nil {
 		panic(err)
@@ -35,5 +36,5 @@ func LoadConfig(path string) (*conf, error) {
 	}
 
 	cfg.TokenAuth = jwtauth.New("HS256", []byte(cfg.JWTSecret), nil)
-	return &conf{}, nil
+	return cfg, nil
 }
