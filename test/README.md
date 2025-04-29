@@ -1,0 +1,1 @@
+<!-- Pasta pra ajudar testar o sistema, docs, e tals nao precisa ser necessariamente arquivos go -->

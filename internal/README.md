@@ -1,0 +1,1 @@
+<!-- Pasta onde ficam as coisas internas do projeto, as quais voce nao quer compartilhar ou deixar outros acessarem -->
