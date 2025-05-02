@@ -5,20 +5,10 @@ import (
 
 	"github.com/joaolima7/api1_goexpert/internal/entity"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
 )
 
-func OpenTestDB() (*gorm.DB, error) {
-	db, err := gorm.Open(sqlite.Open("file::memory"), &gorm.Config{})
-	if err != nil {
-		return nil, err
-	}
-	return db, nil
-}
-
 func TestCreateUser(t *testing.T) {
-	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
+	db, err := OpenTestDB()
 	if err != nil {
 		t.Error(err)
 	}
