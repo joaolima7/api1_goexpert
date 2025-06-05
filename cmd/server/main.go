@@ -12,11 +12,13 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/jwtauth"
 	"github.com/joaolima7/api1_goexpert/configs"
+	_ "github.com/joaolima7/api1_goexpert/docs"
 	"github.com/joaolima7/api1_goexpert/internal/dto"
 	"github.com/joaolima7/api1_goexpert/internal/entity"
 	"github.com/joaolima7/api1_goexpert/internal/infra/database"
 	"github.com/joaolima7/api1_goexpert/internal/infra/webserver/handlers"
 	entityPkg "github.com/joaolima7/api1_goexpert/pkg/entity"
+	httpSwagger "github.com/swaggo/http-swagger"
 	"gorm.io/gorm"
 )
 
@@ -76,6 +78,8 @@ func main() {
 		r.Post("/generate-token", userHandler.GetJWT)
 	})
 
+	r.Get("/docs/*", httpSwagger.Handler(httpSwagger.URL("http://localhost:9000/docs/doc.json")))
+
 	http.ListenAndServe(":9000", r)
 }
 
@@ -89,6 +93,18 @@ func NewProductHandler(db database.ProductInterface) *ProductHandler {
 	}
 }
 
+// CreateProduct godoc
+// @Summary Create a new product
+// @Description Create a new product with name and price
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param product body dto.CreateProductRequest true "Product data"
+// @Success 201
+// @Failure 400 {object} map[string]string "Invalid input"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /products [post]
+// @Security ApiKeyAuth
 func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	var product dto.CreateProductRequest
 	err := json.NewDecoder(r.Body).Decode(&product)
@@ -117,6 +133,18 @@ func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"id": p.ID.String()})
 }
 
+// GetProduct godoc
+// @Summary Get a product by ID
+// @Description Get a product by its ID
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param id path string true "Product ID"
+// @Success 200 {object} entity.Product
+// @Failure 400 {object} map[string]string "Invalid ID"
+// @Failure 404 {object} map[string]string "Product not found"
+// @Router /products/{id} [get]
+// @Security ApiKeyAuth
 func (h *ProductHandler) GetProduct(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
@@ -135,6 +163,20 @@ func (h *ProductHandler) GetProduct(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(product)
 }
 
+// UpdateProduct godoc
+// @Summary Update a product by ID
+// @Description Update a product by its ID
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param id path string true "Product ID"
+// @Param product body entity.Product true "Product data"
+// @Success 200
+// @Failure 400 {object} map[string]string "Invalid ID or input"
+// @Failure 404 {object} map[string]string "Product not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /products/{id} [put]
+// @Security ApiKeyAuth
 func (h *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
@@ -170,6 +212,19 @@ func (h *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+// Delete godoc
+// @Summary Delete a product by ID
+// @Description Delete a product by its ID
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param id path string true "Product ID"
+// @Success 200
+// @Failure 400 {object} map[string]string "Invalid ID"
+// @Failure 404 {object} map[string]string "Product not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /products/{id} [delete]
+// @Security ApiKeyAuth
 func (h *ProductHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
@@ -192,6 +247,19 @@ func (h *ProductHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+// FindAll godoc
+// @Summary Get all products
+// @Description Get all products with pagination and sorting
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param page query int false "Page number" default(0)
+// @Param limit query int false "Number of products per page" default(10)
+// @Param sort query string false "Sort by field" default("name")
+// @Success 200 {array} entity.Product
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /products [get]
+// @Security ApiKeyAuth
 func (h *ProductHandler) FindAll(w http.ResponseWriter, r *http.Request) {
 	page := r.URL.Query().Get("page")
 	limit := r.URL.Query().Get("limit")
