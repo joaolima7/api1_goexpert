@@ -1,0 +1,27 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a sample server for GoExpert API",
+        "title": "GoExpert API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "Joao Caetano",
+            "url": "http://swagger.io/support"
+        },
+        "license": {
+            "name": "RemonatoDev",
+            "url": "https://www.remonatodev.com"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:9000",
+    "basePath": "/",
+    "paths": {},
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

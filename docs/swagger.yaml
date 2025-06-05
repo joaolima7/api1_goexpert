@@ -1,0 +1,20 @@
+basePath: /
+host: localhost:9000
+info:
+  contact:
+    name: Joao Caetano
+    url: http://swagger.io/support
+  description: This is a sample server for GoExpert API
+  license:
+    name: RemonatoDev
+    url: https://www.remonatodev.com
+  termsOfService: http://swagger.io/terms/
+  title: GoExpert API
+  version: "1.0"
+paths: {}
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

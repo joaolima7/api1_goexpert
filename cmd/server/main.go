@@ -2,12 +2,15 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/glebarez/sqlite"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/jwtauth"
 	"github.com/joaolima7/api1_goexpert/configs"
 	"github.com/joaolima7/api1_goexpert/internal/dto"
 	"github.com/joaolima7/api1_goexpert/internal/entity"
@@ -16,6 +19,23 @@ import (
 	entityPkg "github.com/joaolima7/api1_goexpert/pkg/entity"
 	"gorm.io/gorm"
 )
+
+// @title GoExpert API
+// @version 1.0
+// @description This is a sample server for GoExpert API
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name Joao Caetano
+// @contact.url http://swagger.io/support
+
+// @license.name RemonatoDev
+// @license.url https://www.remonatodev.com
+
+// @host localhost:9000
+// @BasePath /
+// @securityDefinitions.apiKey ApiKeyAuth
+// @in header
+// @name Authorization
 
 func main() {
 	configs, err := configs.LoadConfig(".")
@@ -37,14 +57,24 @@ func main() {
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
-	r.Post("/products", productHandler.CreateProduct)
-	r.Get("/products/{id}", productHandler.GetProduct)
-	r.Get("/products", productHandler.FindAll)
-	r.Put("/products/{id}", productHandler.UpdateProduct)
-	r.Delete("/products/{id}", productHandler.Delete)
+	r.Use(middleware.Recoverer)
+	r.Use(middleware.Timeout(time.Second * 10))
 
-	r.Post("/users", userHandler.Create)
-	r.Post("/users/generate-token", userHandler.GetJWT)
+	//Agrupando rotas
+	r.Route("/products", func(r chi.Router) {
+		r.Use(jwtauth.Verifier(configs.TokenAuth))
+		r.Use(jwtauth.Authenticator)
+		r.Post("/", productHandler.CreateProduct)
+		r.Get("/", productHandler.FindAll)
+		r.Get("/{id}", productHandler.GetProduct)
+		r.Put("/{id}", productHandler.UpdateProduct)
+		r.Delete("/{id}", productHandler.Delete)
+	})
+
+	r.Route("/users", func(r chi.Router) {
+		r.Post("/", userHandler.Create)
+		r.Post("/generate-token", userHandler.GetJWT)
+	})
 
 	http.ListenAndServe(":9000", r)
 }
@@ -187,4 +217,12 @@ func (h *ProductHandler) FindAll(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(products)
+}
+
+// Middleware personalizado
+func LogRequest(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("Request: %s %s", r.Method, r.URL.Path)
+		next.ServeHTTP(w, r)
+	})
 }
